@@ -1,0 +1,65 @@
+Praxissoftware Struktur – Timo Hertling
+
+Grundsystem:
+  Patientenverwaltung:
+    - Digitale Patientenakte
+    - Anamnese
+    - Diagnostik
+    - Therapieplanung
+    - Behandlungsdokumentation
+  Praxisorganisation:
+    - Terminplanung
+    - Rechnungsstellung
+    - Buchhaltung
+    - Statistik & Auswertungen
+  Steuerfunktionen:
+    - Einnahmen-Überschuss-Rechnung (EÜR)
+    - Umsatzübersicht
+    - Export für Steuerberater (z. B. DATEV-kompatibel)
+    - GoBD-konforme Archivierung
+
+Zusatzmodule:
+  Klassische Naturheilverfahren:
+    - Schröpfen
+    - Blutegeltherapie
+    - Aderlass
+    - Baunscheidtverfahren
+    - Wickel & Umschläge
+  Pflanzen- & Substanztherapie:
+    - Phytotherapie
+    - Homöopathie
+    - Schüßler-Salze
+    - Spagyrik
+    - Mikrobiologische Therapie
+    - Orthomolekulare Medizin
+  Manuelle & Körpertherapien:
+    - Osteopathie
+    - Chiropraktik
+    - Dorn-Breuß-Methode
+    - Craniosacrale Therapie
+    - Reflexzonenmassage
+    - Lymphdrainage
+  Energetische & feinstoffliche Verfahren:
+    - Bach-Blütentherapie
+    - Bioresonanztherapie
+    - Kinesiologie
+    - Reiki
+    - Farb- und Klangtherapie
+    - Aromatherapie
+  Psychotherapie & Entspannung:
+    - Gesprächstherapie
+    - Systemische Therapie
+    - Meditation
+    - Autogenes Training
+    - Achtsamkeit
+    - Traumatherapie
+  Ganzheitliche Heilsysteme:
+    - Traditionelle Chinesische Medizin (TCM)
+    - Ayurveda
+    - Anthroposophische Medizin
+  Physikalische Therapien:
+    - Kneipp-Anwendungen
+    - Bädertherapie
+    - Licht- und Wärmetherapie
+    - Elektrotherapie
+
