@@ -1,62 +1,93 @@
-from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QLabel, QVBoxLayout, QMenuBar, QMenu
-)
-from PyQt6.QtGui import QAction
-from PyQt6.QtGui import QPixmap, QIcon
-from PyQt6.QtCore import Qt
-import sys
+# -*- coding: utf-8 -*-
 
+"""
+HerbalSuite – GUI Bootstrap (PyQt6 + QML)
+-----------------------------------------
+Dieses Skript startet die Neo‑Botanical QML‑App‑Shell innerhalb
+eines QMainWindow (QQuickWidget als Zentral-Widget).
+
+Voraussetzungen:
+ - PyQt6 (getestet mit 6.9.1)
+ - Ordnerstruktur:
+   app/
+     lib/
+       models/schedule_model.py
+       i18n/de-DE.json
+     ui/AppShell.qml
+
+Start:
+ python "herbalsuite_gui.py"
+"""
+
+import sys, json
+from pathlib import Path
+from PyQt6.QtCore import Qt, QUrl
+from PyQt6.QtWidgets import QApplication, QMainWindow, QMenuBar, QMenu
+from PyQt6.QtQuickWidgets import QQuickWidget
+
+# High-DPI (unter Qt6 sind manche Flags no-op; try/except)
+def enable_high_dpi() -> None:
+    try:
+        QApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling, True)
+    except AttributeError:
+        pass
+    try:
+        QApplication.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps, True)
+    except AttributeError:
+        pass
+
+# Pfade & i18n
+REPO_ROOT = Path(__file__).resolve().parent
+APP_DIR = REPO_ROOT / 'app'
+LIB_DIR = APP_DIR / 'lib'
+UI_DIR = APP_DIR / 'ui'
+I18N_DIR = LIB_DIR / 'i18n'
+
+# Damit "from models.schedule_model import ScheduleModel" funktioniert
+if str(LIB_DIR) not in sys.path:
+    sys.path.insert(0, str(LIB_DIR))
+
+def load_i18n(locale: str = 'de-DE') -> dict:
+    path = I18N_DIR / f'{locale}.json'
+    with open(path, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+# MainWindow mit QML im Zentrum
 class HerbalSuiteMainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle("HerbalSuite")
-        self.setGeometry(100, 100, 1000, 700)
-        self.setStyleSheet("background-color: #f0f4f7;")
+        self.setWindowTitle('HerbalSuite')
+        self.resize(1280, 800)
 
-        # Create menu bar
+        # Menüleiste
         menu_bar = QMenuBar(self)
         self.setMenuBar(menu_bar)
-
-        # Add menus
-        file_menu = QMenu("Datei", self)
-        module_menu = QMenu("Module", self)
-        help_menu = QMenu("Hilfe", self)
+        file_menu = QMenu('Datei', self)
         menu_bar.addMenu(file_menu)
-        menu_bar.addMenu(module_menu)
-        menu_bar.addMenu(help_menu)
 
-        # Add actions to menus
-        exit_action = QAction("Beenden", self)
-        exit_action.triggered.connect(self.close)
-        file_menu.addAction(exit_action)
+        # QML in QWidget einbetten
+        quick = QQuickWidget(self)
+        quick.setResizeMode(QQuickWidget.ResizeMode.SizeRootObjectToView)
 
-        # Central widget
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
+        # Kontext-Objekte bereitstellen
+        from models.schedule_model import ScheduleModel
+        quick.rootContext().setContextProperty('I18N', load_i18n('de-DE'))
+        quick.rootContext().setContextProperty('scheduleModel', ScheduleModel())
 
-        layout = QVBoxLayout()
+        # AppShell laden
+        qml_file = UI_DIR / 'AppShell.qml'
+        quick.setSource(QUrl.fromLocalFile(str(qml_file)))
 
-        # HerbalSuite Logo placeholder
-        logo_label = QLabel()
-        logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        logo_label.setText("🌿 HerbalSuite")
-        logo_label.setStyleSheet("font-size: 32px; font-weight: bold; color: #2e7d32; margin-top: 40px;")
+        # QML-View als zentralen Bereich setzen
+        self.setCentralWidget(quick)
 
-        # Welcome text
-        welcome_label = QLabel("Willkommen bei HerbalSuite – Ihre modulare Heilpflanzen-Software")
-        welcome_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        welcome_label.setStyleSheet("font-size: 18px; color: #555; margin-bottom: 20px;")
-
-        layout.addWidget(logo_label)
-        layout.addWidget(welcome_label)
-
-        central_widget.setLayout(layout)
-
-def main():
+def main() -> None:
+    enable_high_dpi()
     app = QApplication(sys.argv)
-    window = HerbalSuiteMainWindow()
-    window.show()
+    app.setApplicationDisplayName('HerbalSuite')
+    win = HerbalSuiteMainWindow()
+    win.show()
     sys.exit(app.exec())
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
