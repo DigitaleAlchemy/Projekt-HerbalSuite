@@ -1,5 +1,4 @@
-
 database:
-  url: sqlite+pysqlite:///:memory:
+  url: "sqlite+pysqlite:///E:/Projekt-HerbalSuite/dev.db"
 paths:
-  docs: "C:/Users/<User>/Nextcloud/HerbalSuite/Dokumente"
+  docs: "C:\\Users\\t_her\\Documents\\HerbalSuite-Docs"
