@@ -1,4 +1,4 @@
-HerbalSuite – Praxissoftware für Heilpraktiker (GNUmed‑inspiriert)
+HerbalSuite – Praxissoftware für Heilpraktiker mit erweiterbaren Modulen
 Minimal lauffähiges Grundgerüst in Python 3.10+ mit PySide6 (UI) und SQLAlchemy (Datenzugriff) für Windows 10/11.
 Keine Übernahme von GNUmed‑Code; nur fachliche Ideen (EMR, Patient, Encounter, Dokumente) werden aufgegriffen.
 
