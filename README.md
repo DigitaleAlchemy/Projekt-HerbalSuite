@@ -1,39 +1,13 @@
+HerbalSuite – Praxissoftware für Heilpraktiker (GNUmed‑inspiriert)
+Minimal lauffähiges Grundgerüst in Python 3.10+ mit PySide6 (UI) und SQLAlchemy (Datenzugriff) für Windows 10/11.
+Keine Übernahme von GNUmed‑Code; nur fachliche Ideen (EMR, Patient, Encounter, Dokumente) werden aufgegriffen.
 
-# HerbalSuite – Clean‑Room Seed (GNUmed‑inspiriert)
-
-> Minimal lauffähiges Grundgerüst in **Python 3.10+** mit **PySide6** (UI) und **SQLAlchemy** (Datenzugriff) für Windows 10/11. 
-> *Keine* Übernahme von GNUmed‑Code; nur fachliche Ideen (EMR, Patient, Encounter, Dokumente) werden aufgegriffen.
-
-## Features (MVP)
-- Startfenster in Deutsch mit Seitenleiste: Startseite, Patienten, Rezepturen, Diagnostik, Lagerverwaltung, Einstellungen
-- Plugin‑fähige Navigation (einfache Registry)
-- Konfigurierbarer Dokumentenpfad (z. B. Nextcloud‑Sync‑Ordner)
-- PostgreSQL‑Anbindung vorbereitet (optional); UI läuft auch ohne DB
-
-## Entwickeln
-```bash
-python -m venv .venv
-. .venv/Scripts/activate  # Windows PowerShell: .venv\Scripts\Activate.ps1
-pip install -e .
-python -m herbalsuite.app
-# oder
-herbalsuite
-```
-
-## Konfiguration
-- `.env` oder `config/default.yml`
-- Beispiel: `.env.example`
-
-## Datenbank
-- Standard: Postgres per `DATABASE_URL=postgresql+psycopg2://user:pass@localhost:5432/herbalsuite`
-- Erste Tabellen anlegen:
-```python
-from herbalsuite.data.db import Base, engine
-Base.metadata.create_all(bind=engine)
-```
-
-## Packaging (später)
-- PyInstaller / Briefcase / MSI – noch nicht konfiguriert.
-
-## Lizenz
-- Platzhalter. Wähle eine Lizenz (z. B. GPL‑3.0, AGPL‑3.0, MPL‑2.0, Apache‑2.0) passend zu deinem Ziel.
+Features (MVP)
+Startfenster in Deutsch mit Seitenleiste: Startseite, Patienten, Rezepturen, Diagnostik, Lagerverwaltung, Einstellungen
+Patientenverwaltung mit Suchfunktion, Neu/Bearbeiten-Dialog, Doppelklick-Handler
+Kompakter Patientendialog mit Tabs (Stammdaten, Kontakt, Anamnese)
+Erweitertes Datenmodell (Geburtsdatum, Kontakt, Anamnese, Indikator „Offene Rechnung“)
+Plugin‑fähige Navigation (einfache Registry)
+SQLite-Datenbank als Standard (PostgreSQL optional vorbereitet)
+Konfigurierbarer Dokumentenpfad (z. B. Nextcloud‑Sync‑Ordner)
+Roadmap-Sync-Skript für GitHub-Issues (scripts/herbalsuite_roadmap_to_issues.py)
