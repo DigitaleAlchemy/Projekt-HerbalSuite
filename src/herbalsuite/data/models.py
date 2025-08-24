@@ -1,57 +1,47 @@
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Integer, Date, DateTime, ForeignKey, Text
-from datetime import date, datetime
+
+# -*- coding: utf-8 -*-
+"""SQLAlchemy-Modelle für HerbalSuite (erweitert).
+
+Erweitert das Patient-Modell um:
+- Geburtsdatum, Geschlecht
+- Kontaktdaten (Telefon, Mobil, E‑Mail, Straße, PLZ, Ort)
+- Anamnese-Felder
+- Indikator has_open_invoice
+"""
+from sqlalchemy import Column, Integer, String, Date, Boolean, Text, Index
 from .db import Base
 
 class Patient(Base):
-    __tablename__ = 'patients'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    last_name: Mapped[str] = mapped_column(String(120), index=True)
-    first_name: Mapped[str] = mapped_column(String(120), index=True)
-    birth_date: Mapped[date | None] = mapped_column(Date)
-    encounters: Mapped[list['Encounter']] = relationship(back_populates='patient')
+    __tablename__ = "patients"
 
-class Encounter(Base):
-    __tablename__ = 'encounters'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.id'), index=True)
-    when: Mapped[datetime] = mapped_column(DateTime)
-    reason: Mapped[str | None] = mapped_column(String(255))
-    notes: Mapped[list['Note']] = relationship(back_populates='encounter')
-    patient: Mapped['Patient'] = relationship(back_populates='encounters')
+    id = Column(Integer, primary_key=True)
+    first_name = Column(String(100), nullable=False)
+    last_name  = Column(String(100), nullable=False)
 
-class Note(Base):
-    __tablename__ = 'notes'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    encounter_id: Mapped[int] = mapped_column(ForeignKey('encounters.id'), index=True)
-    soap_subjective: Mapped[str | None] = mapped_column(Text)
-    soap_objective: Mapped[str | None] = mapped_column(Text)
-    soap_assessment: Mapped[str | None] = mapped_column(Text)
-    soap_plan: Mapped[str | None] = mapped_column(Text)
-    encounter: Mapped['Encounter'] = relationship(back_populates='notes')
+    date_of_birth = Column(Date, nullable=True)
+    # 'm' = männlich, 'w' = weiblich, 'd' = divers, 'x' = ohne Angabe, 'u' = unbekannt
+    sex = Column(String(1), nullable=True)
 
-class Document(Base):
-    __tablename__ = 'documents'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.id'), index=True)
-    title: Mapped[str] = mapped_column(String(255))
-    path: Mapped[str] = mapped_column(String(1024))
+    phone = Column(String(50), nullable=True)
+    mobile = Column(String(50), nullable=True)
+    email  = Column(String(255), nullable=True)
 
-class Herb(Base):
-    __tablename__ = 'herbs'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(120), unique=True)
-    description: Mapped[str | None] = mapped_column(Text)
+    street      = Column(String(255), nullable=True)
+    postal_code = Column(String(20),  nullable=True)
+    city        = Column(String(100), nullable=True)
 
-class Recipe(Base):
-    __tablename__ = 'recipes'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(200), unique=True)
-    text: Mapped[str | None] = mapped_column(Text)
+    # Anamnese-Felder
+    chief_complaint = Column(Text, nullable=True)   # Hauptbeschwerde
+    allergies       = Column(Text, nullable=True)
+    medications     = Column(Text, nullable=True)
+    diagnoses       = Column(Text, nullable=True)
+    family_history  = Column(Text, nullable=True)
+    lifestyle       = Column(Text, nullable=True)
+    notes           = Column(Text, nullable=True)
 
-class InventoryItem(Base):
-    __tablename__ = 'inventory_items'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    sku: Mapped[str] = mapped_column(String(120), unique=True)
-    name: Mapped[str] = mapped_column(String(200))
-    quantity: Mapped[int] = mapped_column(Integer, default=0)
+    # Rechnungs-Indikator
+    has_open_invoice = Column(Boolean, nullable=False, server_default="0", default=False)
+
+# Indizes
+Index("idx_patients_name", Patient.last_name, Patient.first_name)
+Index("idx_patients_dob", Patient.date_of_birth)

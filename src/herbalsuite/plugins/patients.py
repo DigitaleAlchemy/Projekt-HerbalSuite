@@ -1,122 +1,110 @@
+# -*- coding: utf-8 -*-
+from __future__ import annotations
 
-from PySide6 import QtWidgets
+from PySide6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QLabel,
+    QTableView, QMessageBox, QAbstractItemView
+)
+from PySide6.QtCore import Qt
+
+# Registry-Dekorator wie gehabt
 from . import register
 
-@register("patients")
-def make():
-    w = QtWidgets.QWidget()
-    layout = QtWidgets.QVBoxLayout(w)
-    layout.addWidget(QtWidgets.QLabel("Patientenverwaltung (MVP)") )
-    toolbar = QtWidgets.QHBoxLayout()
-    toolbar.addWidget(QtWidgets.QPushButton("Neu"))
-    toolbar.addWidget(QtWidgets.QPushButton("Bearbeiten"))
-    toolbar.addWidget(QtWidgets.QPushButton("Suchen"))
-    toolbar.addStretch(1)
-    layout.addLayout(toolbar)
-    table = QtWidgets.QTableWidget(0, 4)
-    table.setHorizontalHeaderLabels(["Nachname", "Vorname", "Geburtsdatum", "Patienten-ID"]) 
-    layout.addWidget(table)
-    return w
-from PySide6 import QtWidgets
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QFormLayout, QLineEdit, QPushButton, QMessageBox
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from datetime import datetime
-from . import register
-from herbalsuite.data.models import Patient, Base
-import os
-from dotenv import load_dotenv
+# Session-Helper: bevorzugt get_session, sonst kleiner Fallback
+try:
+    from herbalsuite.data.db import get_session  # type: ignore
+except Exception:
+    from sqlalchemy.orm import sessionmaker
+    from herbalsuite.data.db import engine  # type: ignore
+    SessionLocal = sessionmaker(bind=engine, expire_on_commit=False, autoflush=False)
 
-# Load environment variables
-load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
+    def get_session():  # type: ignore
+        return SessionLocal()
 
-# Setup SQLAlchemy engine and session
-engine = create_engine(DATABASE_URL, echo=False, future=True)
-SessionLocal = sessionmaker(bind=engine)
-Base.metadata.create_all(engine)
+from herbalsuite.data.models import Patient
+from herbalsuite.ui.patient_dialog import PatientDialog
+from herbalsuite.ui.patient_table_model import PatientTableModel
 
-class PatientDialog(QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("Neuen Patienten anlegen")
-        layout = QVBoxLayout(self)
-
-        form_layout = QFormLayout()
-        self.last_name_input = QLineEdit()
-        self.first_name_input = QLineEdit()
-        self.birth_date_input = QLineEdit()
-        self.birth_date_input.setPlaceholderText("TT.MM.JJJJ")
-
-        form_layout.addRow("Nachname:", self.last_name_input)
-        form_layout.addRow("Vorname:", self.first_name_input)
-        form_layout.addRow("Geburtsdatum:", self.birth_date_input)
-
-        layout.addLayout(form_layout)
-
-        save_button = QPushButton("Speichern")
-        save_button.clicked.connect(self.save_patient)
-        layout.addWidget(save_button)
-
-    def save_patient(self):
-        last_name = self.last_name_input.text().strip()
-        first_name = self.first_name_input.text().strip()
-        birth_date_str = self.birth_date_input.text().strip()
-
-        try:
-            birth_date = datetime.strptime(birth_date_str, "%d.%m.%Y").date()
-        except ValueError:
-            QMessageBox.warning(self, "Fehler", "Geburtsdatum muss im Format TT.MM.JJJJ sein.")
-            return
-
-        if not last_name or not first_name:
-            QMessageBox.warning(self, "Fehler", "Bitte alle Felder ausfüllen.")
-            return
-
-        session = SessionLocal()
-        new_patient = Patient(last_name=last_name, first_name=first_name, birth_date=birth_date)
-        session.add(new_patient)
-        session.commit()
-        session.close()
-
-        QMessageBox.information(self, "Erfolg", "Patient erfolgreich gespeichert.")
-        self.accept()
 
 @register("patients")
-def make():
-    w = QtWidgets.QWidget()
-    layout = QtWidgets.QVBoxLayout(w)
-    layout.addWidget(QtWidgets.QLabel("Patientenverwaltung (MVP)"))
-    toolbar = QtWidgets.QHBoxLayout()
+def make(parent=None):
+    w = QWidget(parent)
+    layout = QVBoxLayout(w)
+    layout.addWidget(QLabel("Patientenverwaltung (MVP)"))
 
-    new_button = QtWidgets.QPushButton("Neu")
-    toolbar.addWidget(new_button)
-    toolbar.addWidget(QtWidgets.QPushButton("Bearbeiten"))
-    toolbar.addWidget(QtWidgets.QPushButton("Suchen"))
+    # Toolbar
+    toolbar = QHBoxLayout()
+    btn_new = QPushButton("Neu")
+    btn_edit = QPushButton("Bearbeiten")
+    search_edit = QLineEdit()
+    search_edit.setPlaceholderText("Suchen (Name/Ort/E‑Mail)…")
+    toolbar.addWidget(btn_new)
+    toolbar.addWidget(btn_edit)
     toolbar.addStretch(1)
+    toolbar.addWidget(search_edit)
     layout.addLayout(toolbar)
 
-    table = QtWidgets.QTableWidget(0, 4)
-    table.setHorizontalHeaderLabels(["Nachname", "Vorname", "Geburtsdatum", "Patienten-ID"])
+    # Tabelle
+    table = QTableView()
+    table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+    table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+    table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+    table.setAlternatingRowColors(True)
     layout.addWidget(table)
 
-    def refresh_table():
-        session = SessionLocal()
-        patients = session.query(Patient).all()
-        table.setRowCount(len(patients))
-        for row, patient in enumerate(patients):
-            table.setItem(row, 0, QtWidgets.QTableWidgetItem(patient.last_name))
-            table.setItem(row, 1, QtWidgets.QTableWidgetItem(patient.first_name))
-            table.setItem(row, 2, QtWidgets.QTableWidgetItem(patient.birth_date.strftime("%d.%m.%Y")))
-            table.setItem(row, 3, QtWidgets.QTableWidgetItem(str(patient.id)))
-        session.close()
+    # Session-Lebenszyklus am Widget hängen
+    session = get_session()
+    w.destroyed.connect(lambda *_: session.close())
 
-    def open_patient_dialog():
-        dialog = PatientDialog()
-        if dialog.exec():
-            refresh_table()
+    # Model
+    model = PatientTableModel([])
+    table.setModel(model)
 
-    new_button.clicked.connect(open_patient_dialog)
-    refresh_table()
+    # Daten laden (mit Suche)
+    def load():
+        from sqlalchemy import or_
 
+        q = session.query(Patient)
+        s = search_edit.text().strip()
+        if s:
+            like = f"%{s}%"
+            patients = (
+                q.filter(
+                    or_(
+                        Patient.last_name.ilike(like),
+                        Patient.first_name.ilike(like),
+                        Patient.city.ilike(like),
+                        Patient.email.ilike(like),
+                    )
+                )
+                .order_by(Patient.last_name, Patient.first_name)
+                .all()
+            )
+        else:
+            patients = q.order_by(Patient.last_name, Patient.first_name).all()
+        model.setPatients(patients)
+
+    # Aktionen
+    def add_patient():
+        dlg = PatientDialog(session, parent=w)
+        if dlg.exec():
+            load()
+
+    def edit_patient():
+        idx = table.currentIndex()
+        if not idx.isValid():
+            QMessageBox.information(w, "Bearbeiten", "Bitte zuerst einen Patienten auswählen.")
+            return
+        p = model.patient_at(idx.row())
+        dlg = PatientDialog(session, patient=p, parent=w)
+        if dlg.exec():
+            load()
+
+    # Signals
+    btn_new.clicked.connect(add_patient)
+    btn_edit.clicked.connect(edit_patient)
+    search_edit.textChanged.connect(lambda _text: load())
+
+    # initial laden
+    load()
     return w

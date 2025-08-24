@@ -10,9 +10,12 @@ src/herbalsuite.egg-info/requires.txt
 src/herbalsuite.egg-info/top_level.txt
 src/herbalsuite/data/__init__.py
 src/herbalsuite/data/db.py
+src/herbalsuite/data/migrate.py
 src/herbalsuite/data/models.py
 src/herbalsuite/plugins/__init__.py
 src/herbalsuite/plugins/patients.py
 src/herbalsuite/plugins/start.py
 src/herbalsuite/ui/__init__.py
 src/herbalsuite/ui/main_window.py
+src/herbalsuite/ui/patient_dialog.py
+src/herbalsuite/ui/patient_table_model.py

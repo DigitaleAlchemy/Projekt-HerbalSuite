@@ -1,0 +1,15 @@
+
+*** Bitte diesen Patch manuell in src/herbalsuite/app.py prüfen/einfügen ***
+
+--- a/src/herbalsuite/app.py
++++ b/src/herbalsuite/app.py
+@@
+-from herbalsuite.data.db import Base, engine
++from herbalsuite.data.db import Base, engine
++from herbalsuite.data.migrate import migrate_patients
+@@
+-    # Tabellen erstellen (falls neu)
+-    Base.metadata.create_all(bind=engine)
++    # Tabellen erstellen (falls neu) & Migration fahren
++    Base.metadata.create_all(bind=engine)
++    migrate_patients()
